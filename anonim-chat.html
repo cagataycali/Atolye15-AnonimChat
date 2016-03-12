@@ -4,9 +4,17 @@
 
 <body>
 
-{{>main}}
+{{> loginButtons }}
+<!-- Giriş çıkış işlemleri -->
 
-{{> etiketler }}
+{{#if currentUser}}
+
+    {{>main}}
+
+    {{> etiketler }}
+
+
+{{/if}}
 
 
 </body>

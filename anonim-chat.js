@@ -111,12 +111,18 @@ if (Meteor.isClient)
             event.preventDefault();
 
             /**
+             * Etiket id değerini yakaladık.
+             * @type {*|string|string}
+             */
+            var etiketId = this._id;
+
+            /**
              * Yazı içeriğini al
              * @type {string}
              */
             var yazi = event.target.yazi_icerik.value;
 
-            Meteor.call('yaziEkle',yazi);
+            Meteor.call('yaziEkle',yazi,etiketId);
 
             /**
              * Yazı içerik formunu boşalt!
@@ -143,9 +149,8 @@ if ( Meteor.isServer )
      */
     Meteor.publish('etiketler', function () {
 
-        var etiketIcerik =  Session.get('etiketIcerik');
 
-        return Etiketler.find({"icerik":/etiketIcerik/});
+        return Etiketler.find();
     });
 
     Meteor.publish('yazilar', function () {
@@ -154,24 +159,16 @@ if ( Meteor.isServer )
 
     });
 
-    /**
-     * Meteor'un metods metodu,
-     * Veritabanımıza gireceğimiz (insert) verilerin güvenlik dahilinde
-     * İçeri aktarılması içindir!
-     */
     Meteor.methods({
 
-        /**
-         * Yazı Ekleme Metodu
-         * @param yazi
-         */
-        'yaziEkle': function (yazi) {
+        'yaziEkle': function (yazi,etiketId) {
             Yazilar.insert({
                 icerik : yazi,
-                createdAt : new Date
+                etiketId: etiketId
             });
 
-            console.log("Yazı eklendi dude !!");
+            console.log("Yazı eklendi!");
+
         }
     })
 }

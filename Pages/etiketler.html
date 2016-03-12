@@ -1,13 +1,17 @@
 <template name="etiketler">
     <!--Etiketler template'i-->
     <ul>
-        {{etiketler.icerik}}
-        <ul>
-            {{#each yazilar}}
-                <li>
-                    {{ icerik }}
-                </li>
-            {{/each}}
-        </ul>
+        {{#each etiketler}}
+            <li class="etiket_id">Etiket: {{icerik}} </li>
+
+            <ul>
+                {{#each yazilar}}
+                    <li>
+                        {{ icerik }}
+                    </li>
+                {{/each}}
+            </ul>
+            {{>yaziEkle}}
+        {{/each}}
     </ul>
 </template>

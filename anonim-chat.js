@@ -16,7 +16,6 @@ Yazilar = new Mongo.Collection("Yazilar");
  */
 Etiketler.helpers({
 
-
     /**
      * İlgili etiketin yazıları
      * One To Many
@@ -82,12 +81,21 @@ if (Meteor.isClient)
             event.preventDefault();
 
             /**
-             * Etiket içeriğini girilen yazıdan alıyoruz.
+             * String'i yakalayalım.
              */
-            Session.set("etiketIcerik", event.currentTarget.value);
+            var string = event.currentTarget.value;
+
+
             //console.log(event.currentTarget.value);
 
-            console.log(Session.get("etiketIcerik"));
+            var array = string.split(',');
+
+            /**
+             * Etiket içeriğini girilen yazıdan alıyoruz.
+             */
+            Session.set("etiketIcerik", array);
+
+            console.log(array);
 
         }
     });

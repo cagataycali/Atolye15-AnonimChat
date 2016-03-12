@@ -16,6 +16,18 @@ Yazilar = new Mongo.Collection("Yazilar");
 KullaniciEtiketleri = new Mongo.Collection("KullaniciEtiketleri");
 
 /**
+ * Kullanıcıların sohbetleri
+ * @type {Mongo.Collection}
+ */
+KullaniciSohbetleri = new Mongo.Collection("KullaniciSohbetleri");
+
+/**
+ * Sohbet
+ * @type {Mongo.Collection}
+ */
+Sohbet = new Mongo.Collection("Sohbet");
+
+/**
  * Meteor user
  */
 Meteor.users.helpers({
@@ -39,6 +51,10 @@ Meteor.users.helpers({
      */
     etiketler: function () {
         return KullaniciEtiketleri.find({kullaniciId:Meteor.userId()});
+    },
+
+    sohbetler: function () {
+        return KullaniciSohbetleri.find({kullaniciId:Meteor.userId()});
     }
 
 });
@@ -65,6 +81,18 @@ Etiketler.helpers({
 });
 
 KullaniciEtiketleri.helpers({
+
+    /**
+     * Many to One
+     * @returns {any}
+     */
+    kullanici: function () {
+        return Meteor.users.findOne({_id:this.kullaniciId});
+    }
+
+});
+
+KullaniciSohbetleri.helpers({
 
     /**
      * Many to One
@@ -152,19 +180,41 @@ if (Meteor.isClient)
 
             //console.log(event.currentTarget.value);
 
-            var array = string.split(',');
+            var array_etiketler = string.split(',');
+
+
+
+
+            /**
+             * Elimde bir array var, içerisinde birden fazla etiket mevcut
+             * Veritabanımda Kullanıcı etiketleri adında bir tablo ve bu tablo içerisinde mevcut mu değil mi soracağım.
+             */
+            var i;
+            for (i = 0; i < array_etiketler.length; i++) {
+
+
+                /**
+                 * Burada veritabanına array in exist gibi bir komut dönecek.
+                 * Evet dedi burada başka bir kişide aynı etiket ile konuşma bekliyor.
+                 *
+                */
+                var test_array = KullaniciEtiketleri.findOne({etiketler :array_etiketler[i]});
+
+                console.log(test_array.length);
+            }
 
             /**
              * Etiket içeriğini girilen yazıdan alıyoruz.
              */
-            Session.set("etiketIcerik", array);
+            Session.set("etiketIcerik", array_etiketler);
 
-            console.log(array);
+            //console.log(array);
 
             /**
              * Kullanıcının etiket içeriğine array'i kaydedelim.
              */
-            Meteor.call('kullaniciEtiketEkle',array);
+            Meteor.call('kullaniciEtiketEkle',array_etiketler);
+
 
         }
     });
@@ -256,7 +306,7 @@ if ( Meteor.isServer )
             console.log("Yazı eklendi!");
 
         },
-        'kullaniciEtiketEkle': function (array) {
+        'kullaniciEtiketEkle': function (array_etiketler) {
 
             /**
              * Kullanıcının önceki tüm etiketlerini kaldıralım.
@@ -269,7 +319,7 @@ if ( Meteor.isServer )
             KullaniciEtiketleri.insert({
 
                 kullaniciId: Meteor.userId(),
-                etiketler : array
+                etiketler : array_etiketler
 
             });
         }

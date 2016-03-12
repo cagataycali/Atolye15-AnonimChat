@@ -55,8 +55,8 @@ if (Meteor.isClient)
      * Kullanıcıların kendi yazıları sunucudan publish ( paylaşılıyor ) bizde onu subscribe ( takip ) ediyoruz!
      * Bu sayede veritabanından veriler kullanıcı bazlı filtrelenerek geliyor.
      */
-    Meteor.subscribe('etiketler');
     Meteor.subscribe('yazilar');
+    Meteor.subscribe('etiketler');
 
 
     // Etiketler
@@ -71,12 +71,46 @@ if (Meteor.isClient)
         }
     });
 
+    Template.etiketler.events({
+
+        /**
+         * Form submit edildiğinde!
+         */
+        'submit form': function () {
+
+            /**
+             * İşlemi durdur!
+             */
+            event.preventDefault();
+
+            /**
+             * Yazı içeriğini al
+             * @type {string}
+             */
+            var etiket = event.target.etiket_icerik.value;
+
+            Meteor.call('yaziEkle',yazi);
+
+            /**
+             * Yazı içerik formunu boşalt!
+             * @type {string}
+             */
+            event.target.yazi_icerik.value = "";
+        }
+
+    });
+
+
 
     UI.body.events({
         'keyup .etiket_icerik': function (event) {
 
             event.preventDefault();
-            //console.log(event.currentTarget.value);
+            /**
+             * Etiket içeriğini girilen yazıdan alıyoruz.
+             */
+            Session.set("etiketIcerik", event.currentTarget.value);
+            console.log(event.currentTarget.value);
 
         }
     });
@@ -128,10 +162,18 @@ if ( Meteor.isServer )
     /**
      * Meteor veritabanından verileri paylaşacak ve istemci bu verileri yakalayarak ekrana basacak.
      * Meteor.publish metodunu kullanarak işlerimizi halledeceğiz.
+     * İlgili etiketlerin yazılarını getirelim.
      */
+    Meteor.publish('etiketYazilari', function () {
+
+        var etiketIcerik  = Session.get("etiketIcerik");
+        console.log(etiketIcerik);
+        return Etiketler.find({icerik: etiketIcerik});
+
+    });
+
     Meteor.publish('etiketler', function () {
 
-        // Giriş yapan kullanıcının yazılarını çekmesini istedik.
         return Etiketler.find();
 
     });

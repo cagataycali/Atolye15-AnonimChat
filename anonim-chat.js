@@ -71,46 +71,23 @@ if (Meteor.isClient)
         }
     });
 
-    Template.etiketler.events({
+    UI.body.events({
 
         /**
-         * Form submit edildiğinde!
+         * Herhangibi bir input içerisine yazılan veriyi alıyoruz ve veritabanından sorgulamak üzere session değerine atıyoruz.
+         * @param event
          */
-        'submit form': function () {
-
-            /**
-             * İşlemi durdur!
-             */
-            event.preventDefault();
-
-            /**
-             * Yazı içeriğini al
-             * @type {string}
-             */
-            var etiket = event.target.etiket_icerik.value;
-
-            Meteor.call('yaziEkle',yazi);
-
-            /**
-             * Yazı içerik formunu boşalt!
-             * @type {string}
-             */
-            event.target.yazi_icerik.value = "";
-        }
-
-    });
-
-
-
-    UI.body.events({
         'keyup .etiket_icerik': function (event) {
 
             event.preventDefault();
+
             /**
              * Etiket içeriğini girilen yazıdan alıyoruz.
              */
             Session.set("etiketIcerik", event.currentTarget.value);
-            console.log(event.currentTarget.value);
+            //console.log(event.currentTarget.value);
+
+            console.log(Session.get("etiketIcerik"));
 
         }
     });
@@ -164,18 +141,11 @@ if ( Meteor.isServer )
      * Meteor.publish metodunu kullanarak işlerimizi halledeceğiz.
      * İlgili etiketlerin yazılarını getirelim.
      */
-    Meteor.publish('etiketYazilari', function () {
-
-        var etiketIcerik  = Session.get("etiketIcerik");
-        console.log(etiketIcerik);
-        return Etiketler.find({icerik: etiketIcerik});
-
-    });
-
     Meteor.publish('etiketler', function () {
 
-        return Etiketler.find();
+        var etiketIcerik =  Session.get('etiketIcerik');
 
+        return Etiketler.find({"icerik":/etiketIcerik/});
     });
 
     Meteor.publish('yazilar', function () {

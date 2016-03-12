@@ -11,6 +11,40 @@ Etiketler = new Mongo.Collection("Etiketler");
 Yazilar = new Mongo.Collection("Yazilar");
 
 /**
+ * Kullanıcı Etiketleri
+ */
+KullaniciEtiketleri = new Mongo.Collection("KullaniciEtiketleri");
+
+/**
+ * Meteor user
+ */
+Meteor.users.helpers({
+
+    user_name: function() {
+        return this.username;
+    },
+
+    /**
+     * One To Many
+     * Kullanıcının yazıları
+     * @returns {Cursor}
+     */
+    yazilar: function () {
+        return Yazilar.find({kullaniciId:Meteor.userId()});
+    },
+
+    /**
+     * Kullanıcı etiketleri
+     * @returns {Cursor}
+     */
+    etiketler: function () {
+        return KullaniciEtiketleri.find({kullaniciId:Meteor.userId()});
+    }
+
+});
+
+
+/**
  * Bir etiketin birden fazla yazısı olabilir kurgusunu hazırlayalım.
  * Collection helper kullanarak.
  */
@@ -30,6 +64,18 @@ Etiketler.helpers({
     }
 });
 
+KullaniciEtiketleri.helpers({
+
+    /**
+     * Many to One
+     * @returns {any}
+     */
+    kullanici: function () {
+        return Meteor.users.findOne({_id:this.kullaniciId});
+    }
+
+});
+
 Yazilar.helpers({
 
     /**
@@ -38,6 +84,14 @@ Yazilar.helpers({
      */
     etiket: function () {
         return Etiketler.findOne({ _id:yaziId});
+    },
+
+    /**
+     * Many to One
+     * @returns {any}
+     */
+    kullanici: function () {
+        return Meteor.users.findOne({_id:this.kullaniciId});
     }
 
 });
@@ -55,7 +109,16 @@ if (Meteor.isClient)
      * Bu sayede veritabanından veriler kullanıcı bazlı filtrelenerek geliyor.
      */
     Meteor.subscribe('yazilar');
+    Meteor.subscribe('KullaniciEtiketleri');
     Meteor.subscribe('etiketler');
+
+
+    /**
+     * Kayıtları kullanıcı adı üzerinden almak için.
+     */
+    Accounts.ui.config({
+        passwordSignupFields: "USERNAME_ONLY"
+    });
 
 
     // Etiketler
@@ -68,6 +131,7 @@ if (Meteor.isClient)
              */
             return Etiketler.find();
         }
+
     });
 
     UI.body.events({
@@ -96,6 +160,11 @@ if (Meteor.isClient)
             Session.set("etiketIcerik", array);
 
             console.log(array);
+
+            /**
+             * Kullanıcının etiket içeriğine array'i kaydedelim.
+             */
+            Meteor.call('kullaniciEtiketEkle',array);
 
         }
     });
@@ -167,16 +236,42 @@ if ( Meteor.isServer )
 
     });
 
+    /**
+     * Herkes kendi etiketlerini görebilir.
+     */
+    Meteor.publish('KullaniciEtiketleri', function () {
+
+        return KullaniciEtiketleri.find({kullaniciId: this.userId});
+
+    });
+
     Meteor.methods({
 
         'yaziEkle': function (yazi,etiketId) {
             Yazilar.insert({
-                icerik : yazi,
+                icerik: yazi,
                 etiketId: etiketId
             });
 
             console.log("Yazı eklendi!");
 
+        },
+        'kullaniciEtiketEkle': function (array) {
+
+            /**
+             * Kullanıcının önceki tüm etiketlerini kaldıralım.
+             */
+            KullaniciEtiketleri.remove({kullaniciId:this.userId});
+
+            /**
+             * En son hangi etiketi girdiyse bunu veritabanına yazalım.
+             */
+            KullaniciEtiketleri.insert({
+
+                kullaniciId: Meteor.userId(),
+                etiketler : array
+
+            });
         }
     })
 }

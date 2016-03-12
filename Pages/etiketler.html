@@ -1,0 +1,16 @@
+<template name="etiketler">
+    <!--Etiketler template'i-->
+    <ul>
+        {{#each etiketler}}
+            <li>Etiket: {{icerik}} </li>
+
+            <ul>
+                {{#each yazilar}}
+                    <li>
+                        {{ icerik }}
+                    </li>
+                {{/each}}
+            </ul>
+        {{/each}}
+    </ul>
+</template>

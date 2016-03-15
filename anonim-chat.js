@@ -177,43 +177,17 @@ if (Meteor.isClient)
              */
             var string = event.currentTarget.value;
 
-
-            //console.log(event.currentTarget.value);
-
-            var array_etiketler = string.split(',');
-
-
-
-
-            /**
-             * Elimde bir array var, içerisinde birden fazla etiket mevcut
-             * Veritabanımda Kullanıcı etiketleri adında bir tablo ve bu tablo içerisinde mevcut mu değil mi soracağım.
-             */
-            var i;
-            for (i = 0; i < array_etiketler.length; i++) {
-
-
-                /**
-                 * Burada veritabanına array in exist gibi bir komut dönecek.
-                 * Evet dedi burada başka bir kişide aynı etiket ile konuşma bekliyor.
-                 *
-                */
-                var test_array = KullaniciEtiketleri.findOne({etiketler :array_etiketler[i]});
-
-                console.log(test_array.length);
-            }
-
             /**
              * Etiket içeriğini girilen yazıdan alıyoruz.
              */
-            Session.set("etiketIcerik", array_etiketler);
+            Session.set("etiketIcerik", string);
 
             //console.log(array);
 
             /**
              * Kullanıcının etiket içeriğine array'i kaydedelim.
              */
-            Meteor.call('kullaniciEtiketEkle',array_etiketler);
+            Meteor.call('kullaniciEtiketEkle',string);
 
 
         }
@@ -306,7 +280,7 @@ if ( Meteor.isServer )
             console.log("Yazı eklendi!");
 
         },
-        'kullaniciEtiketEkle': function (array_etiketler) {
+        'kullaniciEtiketEkle': function (etiket) {
 
             /**
              * Kullanıcının önceki tüm etiketlerini kaldıralım.
@@ -319,7 +293,7 @@ if ( Meteor.isServer )
             KullaniciEtiketleri.insert({
 
                 kullaniciId: Meteor.userId(),
-                etiketler : array_etiketler
+                etiketler : etiket
 
             });
         }
